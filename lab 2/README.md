@@ -247,7 +247,7 @@ show
 
 ## 4.5 Mapped Schematic
 
-![Asynchronous Reset Schematic](asyncrhons_reset_hearichal%20design.png)
+![Asynchronous Reset Schematic](asyncrhonous_reset_hearichal_design.png)
 
 **Mapped cells observed:**
 
@@ -297,7 +297,7 @@ gtkwave tb_dff_async_set.vcd
 
 ## 5.3 Simulation Waveform
 
-![Asynchronous Set Waveform](asynchronous_set_tb%20waveform.png)
+![Asynchronous Set Waveform](asynchronous_set_tb_waveform.png)
 
 **Observed signals:**
 
@@ -334,7 +334,7 @@ show
 
 ## 5.5 Mapped Schematic
 
-![Asynchronous Set Schematic](asyncrhons_set_hearichal%20design.png)
+![Asynchronous Set Schematic](asyncrhonous_set_hearichal_design.png)
 
 **Mapped cells observed:**
 
@@ -375,7 +375,7 @@ show
 
 ## 6.3 Mapped Schematic
 
-![Synchronous Reset Schematic](syncrhons_reset_hearichal%20design.png)
+![Synchronous Reset Schematic](synchronous_reset_hearichal_design.png)
 
 **Mapped cells observed:**
 
@@ -447,7 +447,7 @@ show
 
 ## 7.5 Generated Schematic — Second Result
 
-![Multiplication Schematic 2](multiplication_2.png)
+![Multiplication Schematic 2](multiplicaton_2.png)
 
 ## 7.6 Additional Synthesis Screenshot
 
