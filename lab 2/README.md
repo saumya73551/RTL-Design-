@@ -3,7 +3,7 @@
 
 ## 1. Introduction
 
-This lab focuses on Verilog RTL design, simulation, hierarchical design, sequential circuits, and technology mapping using the Sky130 standard-cell library.
+This lab focuses on Verilog RTL design, hierarchical design, sequential circuits, functional simulation, and technology mapping using the Sky130 High-Density (HD) standard-cell library.
 
 The practical exercises covered in this lab are:
 
@@ -12,6 +12,10 @@ The practical exercises covered in this lab are:
 3. Asynchronous set D Flip-Flop simulation and synthesis.
 4. Synchronous reset D Flip-Flop synthesis.
 5. Multiplication by 2 using Verilog RTL and Yosys synthesis.
+
+The objective is to understand how RTL designs are simulated, analyzed, optimized, and mapped to standard cells.
+
+---
 
 ## 2. Tools and Environment
 
@@ -24,16 +28,26 @@ The practical exercises covered in this lab are:
 | Waveform Viewer | GTKWave |
 | Synthesis Tool | Yosys 0.47+121 |
 | Schematic Viewer | Graphviz / xdot |
-| Technology Library | Sky130 HD |
+| Standard-Cell Library | Sky130 HD |
 | Liberty File | `sky130_fd_sc_hd__tt_025C_1v80.lib` |
 
-### Repository Location
+### Repository Working Directory
+
+All practical commands were executed from the following directory:
 
 ```bash
 cd ~/Desktop/sky130RTLDesignAndSynthesisWorkshop/verilog_files
 ```
 
-All commands are executed from the `verilog_files` directory unless mentioned otherwise.
+The Sky130 Liberty file is located at:
+
+```text
+../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+```
+
+### Lab 2 Screenshot Directory
+
+All screenshots related to this lab are maintained in the `lab_2` directory.
 
 ---
 
@@ -41,17 +55,15 @@ All commands are executed from the `verilog_files` directory unless mentioned ot
 
 ## 3. Objective
 
-To understand hierarchical RTL design and how multiple Verilog modules are instantiated and connected to form a top-level design.
+To understand hierarchical RTL design and module instantiation by connecting multiple Verilog modules to form a top-level design.
 
-## 3.1 Verilog Design
+## 3.1 RTL Design
 
-The design contains three modules:
+The design consists of three modules:
 
-- `sub_module1`
-- `sub_module2`
-- `multiple_modules` (top module)
-
-The output of the first submodule is connected to the second submodule through an intermediate signal called `net1`.
+- `sub_module1` — performs an AND operation.
+- `sub_module2` — performs an OR operation.
+- `multiple_modules` — top-level module connecting both submodules.
 
 ### RTL File: `multiple_modules.v`
 
@@ -98,19 +110,19 @@ endmodule
 
 ## 3.2 Functional Explanation
 
-The first module performs an AND operation:
+The first submodule performs an AND operation:
 
 ```verilog
 assign y = a & b;
 ```
 
-The second module performs an OR operation:
+Its output is connected to the intermediate signal `net1`.
+
+The second submodule performs an OR operation:
 
 ```verilog
 assign y = a | b;
 ```
-
-The intermediate signal `net1` connects the two modules.
 
 Therefore:
 
@@ -125,18 +137,18 @@ y = net1 \lor c
 The final Boolean expression is:
 
 \[
-y = (a \land b) \lor c
+\boxed{y = (a \land b) \lor c}
 \]
 
 ## 3.3 Yosys Synthesis Commands
 
-Start Yosys:
+Start Yosys from the Bash terminal:
 
 ```bash
 yosys
 ```
 
-At the `yosys>` prompt:
+Execute the following commands at the `yosys>` prompt:
 
 ```tcl
 read_verilog multiple_modules.v
@@ -148,24 +160,24 @@ show
 
 ## 3.4 Hierarchical Design Schematic
 
-![Hierarchical Design](hierarchical_design.png)
+The schematic illustrates how the two submodules are connected through the intermediate signal `net1`.
+
+![Hierarchical Design Schematic](hierarchical_design.png)
 
 **Observation:**
 
-- `sub_module1` receives inputs `a` and `b`.
-- Its output is connected to `net1`.
-- `sub_module2` receives `net1` and `c`.
-- The final output is `y`.
-
-This demonstrates hierarchical RTL design using module instantiation.
+- Inputs `a` and `b` are connected to `sub_module1`.
+- The output of `sub_module1` is connected through `net1`.
+- `sub_module2` receives `net1` and input `c`.
+- The final output is generated at `y`.
 
 ### Submodule 1
 
-![Sub Module 1](sub_module1.png)
+![Submodule 1 Schematic](sub_module1.png)
 
 ### Multiple Module Netlist
 
-![Multiple Module Netlist](multiple%20module%20netlist.png)
+![Multiple Module Netlist](multiple%20module_netlist.png)
 
 ---
 
@@ -179,12 +191,12 @@ To simulate and synthesize a D Flip-Flop with an asynchronous active-low reset.
 
 | File | Description |
 |---|---|
-| `dff_asyncres.v` | Asynchronous reset DFF RTL |
-| `tb_dff_asyncres.v` | Testbench for simulation |
+| `dff_asyncres.v` | RTL description of the asynchronous reset DFF |
+| `tb_dff_asyncres.v` | Testbench used for simulation |
 
-## 4.2 Simulation Commands
+## 4.2 Simulation Procedure
 
-Compile the RTL and testbench:
+Compile the RTL design and testbench using Icarus Verilog:
 
 ```bash
 iverilog dff_asyncres.v tb_dff_asyncres.v
@@ -196,34 +208,49 @@ Run the simulation:
 ./a.out
 ```
 
-Open the waveform:
+The testbench generates the following waveform file:
+
+```text
+tb_dff_asyncres.vcd
+```
+
+Open the waveform using GTKWave:
 
 ```bash
 gtkwave tb_dff_asyncres.vcd
 ```
 
-## 4.3 Simulation Waveform
+## 4.3 Asynchronous Reset — Simulation Waveform
 
-![Asynchronous Reset Waveform](asynchronous_reset_tb_waveform.png)
+**Design:** `dff_asyncres.v`  
+**Testbench:** `tb_dff_asyncres.v`  
+**Waveform file:** `tb_dff_asyncres.vcd`
 
-**Observed signals:**
+![Asynchronous Reset DFF Simulation Waveform](asynchronous_reset_tb_waveform.png)
 
-- `clk` — Clock signal
-- `async_reset` — Asynchronous reset
-- `d` — Data input
-- `q` — Registered output
+### Signals Observed
 
-**Observation:**
+| Signal | Description |
+|---|---|
+| `clk` | Clock input |
+| `async_reset` | Asynchronous reset input |
+| `d` | Data input |
+| `q` | Registered output |
 
-The asynchronous reset can reset the output independently of the active clock edge.
+### Simulation Result
 
-Simulation completed successfully:
+The simulation completed successfully.
 
 ```text
+VCD info: dumpfile tb_dff_asyncres.vcd opened for output.
 tb_dff_asyncres.v:24: $finish called at 3000000 (1ps)
 ```
 
-## 4.4 Technology Mapping Using Sky130
+**Observation:**
+
+The asynchronous reset controls the output independently of the clock edge. When reset is asserted, the output is reset without waiting for the next active clock edge.
+
+## 4.4 Synthesis and Technology Mapping
 
 Start Yosys:
 
@@ -231,7 +258,7 @@ Start Yosys:
 yosys
 ```
 
-At the `yosys>` prompt:
+Execute the following commands at the `yosys>` prompt:
 
 ```tcl
 read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
@@ -245,20 +272,20 @@ stat
 show
 ```
 
-## 4.5 Mapped Schematic
+## 4.5 Asynchronous Reset — Mapped Schematic
 
-![Asynchronous Reset Schematic](asyncrhonous_reset_hearichal_design.png)
+![Asynchronous Reset DFF Mapped Schematic](asyncrhonous_reset_hearichal_design.png)
 
-**Mapped cells observed:**
+### Mapped Cells Observed
 
 - `sky130_fd_sc_hd__clkinv_1`
 - `sky130_fd_sc_hd__dfrtp_1`
 
-**Explanation:**
+**Observation:**
 
-The reset input is inverted using a Sky130 inverter before connecting to the active-low reset pin (`RESET_B`) of the D Flip-Flop.
+The reset path includes an inverter connected to the active-low reset pin (`RESET_B`) of the mapped Sky130 D Flip-Flop.
 
-The D Flip-Flop stores the input data on the active clock edge.
+The schematic shows the mapped sequential cell and its clock, data, reset, and output connections.
 
 ---
 
@@ -272,12 +299,12 @@ To simulate and synthesize a D Flip-Flop with an asynchronous set input.
 
 | File | Description |
 |---|---|
-| `dff_async_set.v` | Asynchronous set DFF RTL |
-| `tb_dff_async_set.v` | Testbench for simulation |
+| `dff_async_set.v` | RTL description of the asynchronous set DFF |
+| `tb_dff_async_set.v` | Testbench used for simulation |
 
-## 5.2 Simulation Commands
+## 5.2 Simulation Procedure
 
-Compile the design:
+Compile the RTL design and testbench:
 
 ```bash
 iverilog dff_async_set.v tb_dff_async_set.v
@@ -289,34 +316,49 @@ Run the simulation:
 ./a.out
 ```
 
+The generated waveform file is:
+
+```text
+tb_dff_async_set.vcd
+```
+
 Open the waveform:
 
 ```bash
 gtkwave tb_dff_async_set.vcd
 ```
 
-## 5.3 Simulation Waveform
+## 5.3 Asynchronous Set — Simulation Waveform
 
-![Asynchronous Set Waveform](asynchronous_set_tb_waveform.png)
+**Design:** `dff_async_set.v`  
+**Testbench:** `tb_dff_async_set.v`  
+**Waveform file:** `tb_dff_async_set.vcd`
 
-**Observed signals:**
+![Asynchronous Set DFF Simulation Waveform](asynchronous_set_tb_waveform.png)
 
-- `clk` — Clock
-- `async_set` — Asynchronous set
-- `d` — Data input
-- `q` — Output
+### Signals Observed
 
-Simulation completed successfully:
+| Signal | Description |
+|---|---|
+| `clk` | Clock input |
+| `async_set` | Asynchronous set input |
+| `d` | Data input |
+| `q` | Registered output |
+
+### Simulation Result
+
+The simulation completed successfully.
 
 ```text
+VCD info: dumpfile tb_dff_async_set.vcd opened for output.
 tb_dff_async_set.v:25: $finish called at 3000000 (1ps)
 ```
 
 **Observation:**
 
-The asynchronous set input forces the output to its set state independently of the clock.
+The asynchronous set input forces the output to the set state independently of the clock edge.
 
-## 5.4 Technology Mapping Using Sky130
+## 5.4 Synthesis and Technology Mapping
 
 At the `yosys>` prompt:
 
@@ -332,18 +374,18 @@ stat
 show
 ```
 
-## 5.5 Mapped Schematic
+## 5.5 Asynchronous Set — Mapped Schematic
 
-![Asynchronous Set Schematic](asyncrhonous_set_hearichal_design.png)
+![Asynchronous Set DFF Mapped Schematic](asyncrhonus_set_hearichal_design.png)
 
-**Mapped cells observed:**
+### Mapped Cells Observed
 
 - `sky130_fd_sc_hd__clkinv_1`
 - `sky130_fd_sc_hd__dfstp_2`
 
 **Observation:**
 
-The asynchronous set input is inverted before connecting to the active-low set pin (`SET_B`) of the Sky130 D Flip-Flop.
+The schematic shows an inverter in the asynchronous set path and a Sky130 D Flip-Flop with an active-low set pin (`SET_B`).
 
 ---
 
@@ -351,15 +393,17 @@ The asynchronous set input is inverted before connecting to the active-low set p
 
 ## 6. Objective
 
-To understand the synthesis implementation of a D Flip-Flop with synchronous reset.
+To understand the synthesis implementation of a D Flip-Flop with synchronous reset and examine the mapped logic.
 
-## 6.1 Technology Mapping
+## 6.1 Synchronous Reset Concept
 
-The synchronous reset is evaluated as part of the clocked data path. Unlike asynchronous reset, it affects the stored output only at the active clock edge.
+Unlike an asynchronous reset, a synchronous reset affects the stored output only at the active clock edge.
 
-## 6.2 Yosys Commands
+The reset condition is evaluated as part of the clocked data path.
 
-At the `yosys>` prompt:
+## 6.2 Yosys Synthesis Commands
+
+Start Yosys and execute the following commands:
 
 ```tcl
 read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
@@ -373,18 +417,20 @@ stat
 show
 ```
 
-## 6.3 Mapped Schematic
+## 6.3 Synchronous Reset — Mapped Schematic
 
-![Synchronous Reset Schematic](synchronous_reset_hearichal_design.png)
+![Synchronous Reset DFF Mapped Schematic](synchronous_reset_hearichal_design.png)
 
-**Mapped cells observed:**
+### Mapped Cells Observed
 
 - `sky130_fd_sc_hd__nor2b_1`
 - `sky130_fd_sc_hd__dfrtp_1`
 
 **Observation:**
 
-The reset logic is implemented using a NOR-based gate in the data path, followed by the D Flip-Flop.
+The mapped schematic shows reset-related combinational logic connected to a Sky130 D Flip-Flop.
+
+The reset behavior is synchronous in the RTL; the mapped logic implements that behavior through the data path.
 
 ---
 
@@ -392,14 +438,16 @@ The reset logic is implemented using a NOR-based gate in the data path, followed
 
 ## 7. Objective
 
-To implement multiplication by 2 using Verilog RTL and understand how Yosys optimizes the operation during synthesis.
+To implement multiplication by 2 in Verilog and examine the RTL optimization performed by Yosys.
 
 ## 7.1 RTL Files
+
+The multiplication examples used in this exercise include:
 
 - `mult_2.v`
 - `mult_8.v`
 
-Open the files side by side using GVim:
+Open both files side by side using GVim:
 
 ```bash
 gvim mult_*.v -o
@@ -407,7 +455,8 @@ gvim mult_*.v -o
 
 ## 7.2 Verilog RTL — Multiplication by 2
 
-File: `mult_2.v`
+**RTL file:** `mult_2.v`  
+**Top module:** `mul2`
 
 ```verilog
 module mul2 (
@@ -420,7 +469,7 @@ module mul2 (
 endmodule
 ```
 
-The design multiplies a 3-bit input by 2 and generates a 4-bit output.
+The design accepts a 3-bit input and generates a 4-bit output.
 
 ## 7.3 Yosys Synthesis Commands
 
@@ -438,24 +487,26 @@ read_verilog mult_2.v
 hierarchy -top mul2
 synth -top mul2
 abc -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
-show
+show mul2
 ```
 
-## 7.4 Generated Schematic — First Result
+## 7.4 Multiplication by 2 — Generated Schematic
 
-![Multiplication Schematic](multiplication.png)
+![Multiplication by 2 Schematic](multiplication.png)
 
-## 7.5 Generated Schematic — Second Result
+## 7.5 Multiplication by 2 — Additional Schematic Result
 
-![Multiplication Schematic 2](multiplicaton_2.png)
+![Multiplication by 2 Additional Schematic](multiplicaton_2.png)
 
-## 7.6 Additional Synthesis Screenshot
+## 7.6 Additional Synthesis Result
 
 ![Multiplication Synthesis Result](multiplication_3.png)
 
-## 7.7 Synthesized Verilog Netlist
+## 7.7 Generated Verilog Netlist
 
-The generated netlist was saved as `mul2_netlist.v`.
+The synthesized netlist was saved as:
+
+`mul2_netlist.v`
 
 ```verilog
 module mul2(a, y);
@@ -473,7 +524,7 @@ endmodule
 
 ## 7.8 Understanding the Optimization
 
-The original RTL operation is:
+The original RTL expression is:
 
 \[
 y = a \times 2
@@ -485,15 +536,15 @@ Multiplication by 2 is equivalent to shifting the input left by one bit:
 y = a \ll 1
 \]
 
-Therefore, Yosys optimizes the operation into a simple bit connection:
+Yosys optimizes the multiplication into a bit connection:
 
 ```verilog
 assign y = { a, 1'h0 };
 ```
 
-The output connections are:
+The output mapping is:
 
-| Output bit | Source |
+| Output Bit | Source |
 |---|---|
 | `y[3]` | `a[2]` |
 | `y[2]` | `a[1]` |
@@ -502,7 +553,7 @@ The output connections are:
 
 ### Example
 
-For an input:
+For the input:
 
 ```text
 a = 3'b101
@@ -516,7 +567,7 @@ y = 4'b1010
 
 **Observation:**
 
-The synthesis report shows zero logic cells because the optimized operation requires only wiring and a constant zero. ABC has no gates to map in this design.
+The generated netlist contains only bit connections and a constant zero. No standard-cell logic gates are required for this optimized operation.
 
 ---
 
@@ -524,16 +575,16 @@ The synthesis report shows zero logic cells because the optimized operation requ
 
 | Feature | Asynchronous Reset | Asynchronous Set | Synchronous Reset |
 |---|---|---|---|
-| Control operation | Reset | Set | Reset |
-| Clock dependency | No | No | Yes |
-| Output action | Clears output | Sets output | Clears output at active clock edge |
-| Implementation observed | DFF with RESET_B | DFF with SET_B | Reset logic at D input |
+| Function | Reset output | Set output | Reset output |
+| Clock dependency | Independent of clock | Independent of clock | Depends on active clock edge |
+| Effect | Clears stored output | Sets stored output | Clears stored output at clock edge |
+| Evidence in this lab | Simulation and schematic | Simulation and schematic | Mapped schematic |
 
 ---
 
-# 9. Important Commands Summary
+# 9. Important Commands Reference
 
-## Simulation — Bash Terminal
+## 9.1 Simulation — Bash Terminal
 
 ### Asynchronous Reset
 
@@ -551,7 +602,9 @@ iverilog dff_async_set.v tb_dff_async_set.v
 gtkwave tb_dff_async_set.vcd
 ```
 
-## Synthesis — Yosys
+## 9.2 Synthesis — Yosys
+
+General synthesis flow for the sequential designs:
 
 ```tcl
 read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
@@ -569,15 +622,15 @@ show
 
 # 10. Conclusion
 
-In this lab, different RTL structures were simulated and synthesized using open-source EDA tools.
+This lab provided practical experience in Verilog RTL design, simulation, hierarchical module instantiation, and synthesis using the Sky130 HD standard-cell library.
 
-The practical exercises demonstrated:
+The major learning outcomes were:
 
-1. Hierarchical design and module instantiation in Verilog.
-2. Functional simulation of asynchronous reset and set D Flip-Flops.
-3. Technology mapping of sequential circuits using the Sky130 HD library.
-4. Differences between synchronous and asynchronous reset behavior.
-5. RTL optimization performed by Yosys.
-6. Conversion of multiplication by 2 into a simple left-shift operation.
+1. Understanding hierarchical design and connections between Verilog modules.
+2. Simulating asynchronous reset and asynchronous set D Flip-Flops.
+3. Inspecting simulation waveforms using GTKWave.
+4. Understanding the differences between synchronous and asynchronous reset behavior.
+5. Mapping sequential RTL designs to Sky130 standard cells using Yosys.
+6. Understanding how synthesis optimizes multiplication by 2 into simple bit connections.
 
-The lab provided practical experience with Verilog RTL, Icarus Verilog, GTKWave, Yosys, and Sky130 standard-cell technology mapping.
+The experiments demonstrated the RTL-to-synthesis workflow using Icarus Verilog, GTKWave, Yosys, and the Sky130 standard-cell library.
