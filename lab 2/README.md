@@ -204,7 +204,7 @@ gtkwave tb_dff_asyncres.vcd
 
 ## 4.3 Simulation Waveform
 
-![Asynchronous Reset Waveform](asynchronous_reset_tb%20waveform.png)
+![Asynchronous Reset Waveform](asynchronous_reset_tb_waveform.png)
 
 **Observed signals:**
 
